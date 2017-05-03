@@ -2,7 +2,7 @@
 import xbmc
 import time
 import xbmcgui
-from util import *
+from resources.lib.util import *
 
 class NakamoriPlayer(xbmc.Player):
 
