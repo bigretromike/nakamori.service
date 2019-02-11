@@ -3,8 +3,9 @@
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
         <import addon="script.module.nakamori" version="3.0.0"/>
+        <import addon="script.module.nakamori-lib" version="3.0.9" />
     </requires>
-    <extension point="xbmc.service" library="nakamoriservice.py"  start="startup" />
+    <extension point="xbmc.service" library="nakamori_service.py"  start="startup" />
     <extension point="xbmc.addon.metadata">
         <platform>all</platform>
         <summary lang="en">Nakamori service</summary>

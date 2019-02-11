@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import time
 import xbmc
 
-import nakamori_utils.nakamoritools as nt
+from nakamori_utils.globalvars import *
 
 
 def handle_scrobbling():
@@ -30,7 +29,7 @@ if __name__ == '__main__':
             continue
 
         playing_file = player.getPlayingFile()
-        if playing_file is None or nt.server not in playing_file:
+        if playing_file is None or server not in playing_file:
             continue
 
         handle_scrobbling()
