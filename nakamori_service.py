@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import xbmc
-
 from nakamori_utils.globalvars import *
 
 
