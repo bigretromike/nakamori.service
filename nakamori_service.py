@@ -1,7 +1,8 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 from nakamori_utils.globalvars import *
+import lib.custom_monitor as cm
+import xbmc
 
 
 def handle_scrobbling():
@@ -13,7 +14,7 @@ def handle_scrobbling():
 
 
 if __name__ == '__main__':
-    monitor = xbmc.Monitor()
+    monitor = cm.CustomMonitor()
 
     while not monitor.abortRequested():
         # Sleep/wait for abort for 2 seconds
