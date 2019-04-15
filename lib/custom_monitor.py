@@ -55,21 +55,23 @@ class CustomMonitor(xbmc.Monitor):
         if method == 'VideoLibrary.OnUpdate':
             response = json.loads(data)
             if 'item' in response and 'type' in response['item'] and response.get('item').get('type') == 'episode':
-                playcount = response['playcount']
-                episode_id = str(response['item']['id'])
-                rpc = xbmc.executeJSONRPC('{ "jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodeDetails", "params": {"properties": ["file", "productioncode"], "episodeid": ' + episode_id + '}, "id": 1 }')
-                rpc_json = json.loads(rpc)
-                if 'episodedetails' in rpc_json['result'] and 'file' in rpc_json['result'].get('episodedetails'):
-                    file = rpc_json['result'].get('episodedetails').get('file')
-                    if 'plugin.video.nakamori' in file:
-                        file = file.replace('plugin://plugin.video.nakamori/tvshows/', '')
-                        file = file.replace('/play', '')
-                        ep_id = int(file)
-                        watch_flag = True if playcount == 1 else False
-                        xbmc.executebuiltin("RunScript(script.module.nakamori,/episode/%s/set_watched/%s)" % (ep_id, watch_flag))
-                    else:
-                        # not our file
-                        pass
+                playcount = response.get('playcount', -1)
+                episode_id = int(response['item'].get('id', 0))
+                # this event get trigger while adding items from video source
+                if episode_id > 0 and playcount != -1:
+                    rpc = xbmc.executeJSONRPC('{ "jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodeDetails", "params": {"properties": ["file", "productioncode"], "episodeid": %s}, "id": 1 }' % episode_id)
+                    rpc_json = json.loads(rpc)
+                    if 'episodedetails' in rpc_json['result'] and 'file' in rpc_json['result'].get('episodedetails'):
+                        file = rpc_json['result'].get('episodedetails').get('file')
+                        if 'plugin.video.nakamori' in file:
+                            file = file.replace('plugin://plugin.video.nakamori/tvshows/', '')
+                            file = file.replace('/play', '')
+                            ep_id = int(file)
+                            watch_flag = True if playcount == 1 else False
+                            xbmc.executebuiltin("RunScript(script.module.nakamori,/episode/%s/set_watched/%s)" % (ep_id, watch_flag))
+                        else:
+                            # not our file
+                            pass
         # full list of all method that we could use (excluding AudioLibrary)
         # https://github.com/xbmc/xbmc/blob/master/xbmc/interfaces/json-rpc/schema/notifications.json
         # some of them does duplication as Monitor functions that get trigger
