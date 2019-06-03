@@ -3,7 +3,7 @@ import xbmc
 import xbmcaddon
 import json
 from nakamori_utils import script_utils
-
+import library_map as map
 addon = xbmcaddon.Addon('service.nakamori')
 
 
@@ -129,7 +129,8 @@ class CustomMonitor(xbmc.Monitor):
             xbmc.log('3 ----------- rpc response: %s' % rpc, xbmc.LOGNOTICE)
             for player in rpc['result']:
                 xbmc.log('4 ----------- player: %s' % player, xbmc.LOGNOTICE)
-                if player['type'] == 'video:':
+                xbmc.log('4.5 ---------- %s %s ' % (player['type'], player['playerid']), xbmc.LOGNOTICE)
+                if player.get('type', 'video') == 'video':
                     playerid = int(player['playerid'])
 
             xbmc.log('5 ----------- playerid: %s' % playerid, xbmc.LOGNOTICE)
@@ -138,31 +139,40 @@ class CustomMonitor(xbmc.Monitor):
             shoko_aid = -1
             is_in_vl = False
             if playerid != -1:
-                rpc = xbmc.executeJSONRPC('{"jsonrpc":"2.0","id":40,"method":"Player.GetItem","params":{"playerid":%s,"properties":["showtitle","title","type","episode","season","uniqueid","playcount","lastplayed","userrating","tvshowid","file", "mediapath"]}}') % playerid
+                rpc = xbmc.executeJSONRPC('{"jsonrpc":"2.0","id":40,'
+                                          '"method":"Player.GetItem",'
+                                          '"params":{"playerid":%s,"properties":["showtitle","title","episode",'
+                                          '"season","uniqueid","playcount","lastplayed","userrating","tvshowid","file",'
+                                          '"mediapath"]}}' % playerid)
                 rpc = json.loads(rpc)
-                if 'results' in rpc:
-                    if 'item' in rpc['results']:
-                        showtitle = rpc['results'].get('showtitle', '')
-                        title = rpc['results'].get('title', '')
-                        showtype = rpc['results'].get('type', 'episode')
-                        episode = rpc['results'].get('episode', '-1')
-                        season = rpc['results'].get('season', '-1')
-                        file_node = rpc['results']['file']
+                xbmc.log('6 ----------- rpc: %s' % rpc, xbmc.LOGNOTICE)
+
+                if 'result' in rpc:
+                    if 'item' in rpc['result']:
+                        item = rpc['result'].get('item', '[]')
+                        showtitle = item.get('showtitle', '')
+                        title = item.get('title', '')
+                        showtype = item.get('type', 'episode')
+                        episode = item.get('episode', '-1')
+                        season = item.get('season', '-1')
+                        file_node = item.get('file', '')
                         if "plugin.video.nakamori/episode/" in file_node and "/file/0/play" in file_node:
                             is_in_vl = True
                         elif '/Stream/' in file_node and '/False/file.mkv' in file_node:
                             is_in_vl = False
 
-                        if 'uniqueid' in rpc['results']['item']:
-                            if 'shoko_eid' in rpc['results']['item']['uniqueid']:
-                                shoko_eid = rpc['results']['item']['uniqueid'].get('shoko_eid', -1)
-                                shoko_aid = rpc['results']['item']['uniqueid'].get('shoko_aid', -1)
+                        if 'uniqueid' in item:
+                            if 'shoko_eid' in item['uniqueid']:
+                                shoko_eid = item['uniqueid'].get('shoko_eid', -1)
+                                shoko_aid = item['uniqueid'].get('shoko_aid', -1)
 
                         xbmc.log('-----> %s %s %s %s %s %s' % (showtitle, title, showtype, episode, season, file_node), xbmc.LOGNOTICE)
 
-                if shoko_eid != -1 and shoko_aid != -1:
-                    # TODO add to database
-                    pass
+                        if shoko_eid != -1 and shoko_aid != -1:
+                            xbmc.log('----->>>> %s' % map.get_data_from_map(file_node), xbmc.LOGNOTICE)
+                            if map.get_data_from_map(filename=file_node) is None:
+                                map.add_map(showtitle, title, showtype, episode, season, file_node, shoko_eid, str(is_in_vl))
+
 
                     #if is_in_vl:
                     #    # TODO from VL to shoko
@@ -181,6 +191,17 @@ class CustomMonitor(xbmc.Monitor):
             # send proper mark in proper direction
 
         elif method in {"Player.OnStop"}:
+            xbmc.log('->>>>>>>>> DATA (OnStop): %s' % data, xbmc.LOGNOTICE)
             response = json.loads(data)
-            xbmc.log('Found (OnStop) response: %s' % response, xbmc.LOGNOTICE)
+            xbmc.log('->>>>>>>>> RESPONS (OnStop): %s' % response, xbmc.LOGNOTICE)
+
+            showtitle = response['item'].get('showtitle', '')
+            title = response['item'].get('title', '')
+            showtype = response['item'].get('type', 'episode')
+            episode = response['item'].get('episode', '-1')
+            season = response['item'].get('season', '-1')
+            row = map.get_data_from_map(showtitle, title, showtype, episode, season)
+            xbmc.log('MAP: %s %s %s %s %s' % (showtitle, title, showtype, episode, season), xbmc.LOGNOTICE)
+
+            xbmc.log('->>>>>>>>> ROW (OnStop): %s' % row, xbmc.LOGNOTICE)
             pass
