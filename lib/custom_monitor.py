@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 import xbmc
+import xbmcaddon
 import json
+from nakamori_utils import script_utils
+
+addon = xbmcaddon.Addon('service.nakamori')
 
 
 class CustomMonitor(xbmc.Monitor):
@@ -51,9 +55,12 @@ class CustomMonitor(xbmc.Monitor):
 
     def onNotification(self, sender, method, data):
         xbmc.log('onNotification', xbmc.LOGNOTICE)
+        xbmc.log('Found data: %s' % data, xbmc.LOGNOTICE)
+        xbmc.log('Found method: %s' % method, xbmc.LOGNOTICE)
 
         if method == 'VideoLibrary.OnUpdate':
             response = json.loads(data)
+            xbmc.log('Found response: %s' % response, xbmc.LOGNOTICE)
             if 'item' in response and 'type' in response['item'] and response.get('item').get('type') == 'episode':
                 playcount = response.get('playcount', -1)
                 episode_id = int(response['item'].get('id', 0))
@@ -72,16 +79,13 @@ class CustomMonitor(xbmc.Monitor):
                         else:
                             # not our file
                             pass
+
         # full list of all method that we could use (excluding AudioLibrary)
         # https://github.com/xbmc/xbmc/blob/master/xbmc/interfaces/json-rpc/schema/notifications.json
         # some of them does duplication as Monitor functions that get trigger
         # not sure if all or where its better to handle them :-)
-        elif method in {"Player.OnPlay",
-                        "Player.OnResume",
-                        "Player.OnAVStart",
-                        "Player.OnAVChange",
+        elif method in {"Player.OnResume",
                         "Player.OnPause",
-                        "Player.OnStop",
                         "Player.OnSpeedChanged",
                         "Player.OnSeek",
                         "Player.OnPropertyChanged",
@@ -106,4 +110,77 @@ class CustomMonitor(xbmc.Monitor):
                         "GUI.OnDPMSActivated",
                         "GUI.OnDPMSDeactivated"
                         }:
+            pass
+        elif method in {"Player.OnAVChange", "Player.OnPlay"}:
+            response = json.loads(data)
+            xbmc.log('Found (OnPlay) response: %s' % response, xbmc.LOGNOTICE)
+
+            playerid = -1
+            rpc = xbmc.executeJSONRPC('{"jsonrpc":"2.0","id":33,"method":"Player.GetActivePlayers","params":{}}')
+            rpc = json.loads(rpc)
+            xbmc.log('1 ----------- rpc response: %s' % rpc, xbmc.LOGNOTICE)
+            # get current playerid, should be 1, but who know
+            while len(rpc.get('result', [])) == 0:
+                xbmc.sleep(100)
+                rpc = xbmc.executeJSONRPC('{"jsonrpc":"2.0","id":33,"method":"Player.GetActivePlayers","params":{}}')
+                rpc = json.loads(rpc)
+                xbmc.log('2 ----------- rpc response: %s' % rpc, xbmc.LOGNOTICE)
+
+            xbmc.log('3 ----------- rpc response: %s' % rpc, xbmc.LOGNOTICE)
+            for player in rpc['result']:
+                xbmc.log('4 ----------- player: %s' % player, xbmc.LOGNOTICE)
+                if player['type'] == 'video:':
+                    playerid = int(player['playerid'])
+
+            xbmc.log('5 ----------- playerid: %s' % playerid, xbmc.LOGNOTICE)
+            # get information about played file
+            shoko_eid = -1
+            shoko_aid = -1
+            is_in_vl = False
+            if playerid != -1:
+                rpc = xbmc.executeJSONRPC('{"jsonrpc":"2.0","id":40,"method":"Player.GetItem","params":{"playerid":%s,"properties":["showtitle","title","type","episode","season","uniqueid","playcount","lastplayed","userrating","tvshowid","file", "mediapath"]}}') % playerid
+                rpc = json.loads(rpc)
+                if 'results' in rpc:
+                    if 'item' in rpc['results']:
+                        showtitle = rpc['results'].get('showtitle', '')
+                        title = rpc['results'].get('title', '')
+                        showtype = rpc['results'].get('type', 'episode')
+                        episode = rpc['results'].get('episode', '-1')
+                        season = rpc['results'].get('season', '-1')
+                        file_node = rpc['results']['file']
+                        if "plugin.video.nakamori/episode/" in file_node and "/file/0/play" in file_node:
+                            is_in_vl = True
+                        elif '/Stream/' in file_node and '/False/file.mkv' in file_node:
+                            is_in_vl = False
+
+                        if 'uniqueid' in rpc['results']['item']:
+                            if 'shoko_eid' in rpc['results']['item']['uniqueid']:
+                                shoko_eid = rpc['results']['item']['uniqueid'].get('shoko_eid', -1)
+                                shoko_aid = rpc['results']['item']['uniqueid'].get('shoko_aid', -1)
+
+                        xbmc.log('-----> %s %s %s %s %s %s' % (showtitle, title, showtype, episode, season, file_node), xbmc.LOGNOTICE)
+
+                if shoko_eid != -1 and shoko_aid != -1:
+                    # TODO add to database
+                    pass
+
+                    #if is_in_vl:
+                    #    # TODO from VL to shoko
+                    #    if addon.getSetting("vs_watch") == 'true':
+                    #        script_utils.url_series_watched_status(self.id, True)
+                    #        pass
+                    #    if addon.getSetting("vs_rate") == 'true':
+                    #        pass
+                    #else:
+                    #    # TODO from Shoko to VL
+                    #    if addon.getSetting("sv_watch") == 'true':
+                    #        pass
+                    #    if addon.getSetting("sv_rate") == 'true':
+                    #        pass
+
+            # send proper mark in proper direction
+
+        elif method in {"Player.OnStop"}:
+            response = json.loads(data)
+            xbmc.log('Found (OnStop) response: %s' % response, xbmc.LOGNOTICE)
             pass
