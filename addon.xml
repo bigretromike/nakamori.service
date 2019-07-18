@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="service.nakamori" name="nakamori-service" version="3.3.0~beta1" provider-name="bigretromike">
+<addon id="service.nakamori" name="nakamori-service" version="3.3.0" provider-name="bigretromike">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
-        <import addon="script.module.nakamori" version="3.1.0"/>
-        <import addon="script.module.nakamori-lib" version="3.1.0" />
+        <import addon="script.module.nakamori" version="3.3.0"/>
+        <import addon="script.module.nakamori-lib" version="3.3.0" />
     </requires>
     <extension point="xbmc.service" library="nakamori_service.py"  start="startup" />
     <extension point="xbmc.addon.metadata">
@@ -13,7 +13,7 @@
         <website>https://shokunin.monogatari.pl/</website>
         <source>http://github.com/bigretromike/nakamori.service</source>
         <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
-        <news>3.1.0[CR]- we are still looking for inspiration</news>
+        <news>3.3.0[CR]- we are still looking for inspiration while waiting for Kodi to be fixed</news>
     </extension>
     <assets>
         <icon>resources/icon.png</icon>
