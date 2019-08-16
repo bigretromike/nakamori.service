@@ -7,5 +7,7 @@
         <setting label="32002" type="lsep"/>
             <setting label="32003" type="bool" id="sv_watch" default="true"/>
             <setting label="32004" type="bool" id="sv_rate" default="true"/>
+
+        <setting type="number" id="last_call" default="1543210000" visible="false"/>
     </category>
 </settings>

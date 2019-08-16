@@ -2,9 +2,9 @@
 import xbmc
 import xbmcaddon
 import json
-from nakamori_utils import script_utils
+# from nakamori_utils import script_utils
 import library_map as map
-addon = xbmcaddon.Addon('service.nakamori')
+# addon = xbmcaddon.Addon('service.nakamori')
 
 
 class CustomMonitor(xbmc.Monitor):
