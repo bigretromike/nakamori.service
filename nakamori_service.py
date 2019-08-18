@@ -36,6 +36,8 @@ if __name__ == '__main__':
 
         # once per week
         if (int(time.time()) - last_call) > 604800:
+            log_setsuzoku(Category.SYSTEM, Action.KODI, xbmc.getInfoLabel('System.BuildVersion'))
+
             # fix for busy from osversioninfo + future failsafe just in case
             _try = 0
             os_version = str(xbmc.getInfoLabel('System.OSVersionInfo')).lower()
@@ -46,7 +48,6 @@ if __name__ == '__main__':
 
             last_call = int(time.time())
             xbmcaddon.Addon('service.nakamori').setSetting('last_call', '%s' % last_call)
-            log_setsuzoku(Category.SYSTEM, Action.KODI, xbmc.getInfoLabel('System.BuildVersion'))
             log_setsuzoku(Category.SYSTEM, Action.OS, xbmc.getInfoLabel('System.OSVersionInfo'))
 
         # Sleep/wait for abort for 2 seconds
