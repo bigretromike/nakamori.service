@@ -41,30 +41,32 @@ if __name__ == '__main__':
             # fix for busy from osversioninfo + future failsafe just in case
             _try = 0
             os_version = str(xbmc.getInfoLabel('System.OSVersionInfo')).lower()
-            while os_version == 'busy' and _try < 10:
+            while os_version == 'busy' and _try < 3:
                 _try += 1
-                xbmc.sleep(100)
+                xbmc.sleep(1000)
                 os_version = str(xbmc.getInfoLabel('System.OSVersionInfo')).lower()
 
             last_call = int(time.time())
             xbmcaddon.Addon('service.nakamori').setSetting('last_call', '%s' % last_call)
             log_setsuzoku(Category.SYSTEM, Action.OS, xbmc.getInfoLabel('System.OSVersionInfo'))
 
-        # Sleep/wait for abort for 2 seconds
-        if monitor.waitForAbort(2):
-            # Abort was requested while waiting. We should exit
-            break
 
         # we are running, check the players for relevant playback
-        player = xbmc.Player()
-        if not player.isPlayingVideo():
-            continue
+        # player = xbmc.Player()
+        # if not player.isPlayingVideo():
+        #    continue
 
-        #playing_file = player.getPlayingFile()
-        #if playing_file is None or server not in playing_file:
+        # playing_file = player.getPlayingFile()
+        # if playing_file is None or server not in playing_file:
         #    continue
 
         handle_scrobbling()
+
+        # Sleep/wait for abort for 10 seconds
+        if monitor.waitForAbort(10):
+            # Abort was requested while waiting. We should exit
+            break
+
         # TODO part1. this service should monitor player activity
         # TODO part2. if it detects playing video we will check for shoko_exclusive parameters
         # TODO part3. if it detects that value it should check then handle status/marks to shoko
