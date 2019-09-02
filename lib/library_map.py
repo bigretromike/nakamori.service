@@ -21,6 +21,7 @@ else:
 
 db_connection.close()
 
+
 def add_map(showtitle, title, showtype, episode, season, filename, shoko_eid, direction):
     date = time.time()
     db_connection = database.connect(db_file)

@@ -11,6 +11,10 @@ import lib.custom_monitor as cm
 import xbmc
 import xbmcaddon
 import time
+import json
+
+global json_id
+json_id = 0
 
 
 def handle_scrobbling():

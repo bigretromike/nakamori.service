@@ -5,6 +5,7 @@ import json
 # from nakamori_utils import script_utils
 import library_map as map
 # addon = xbmcaddon.Addon('service.nakamori')
+import videolibrary_mapper
 
 
 class CustomMonitor(xbmc.Monitor):
@@ -33,6 +34,7 @@ class CustomMonitor(xbmc.Monitor):
     def onScanFinished(self, library):
         xbmc.log('onScanFinished', xbmc.LOGNOTICE)
         xbmc.log(str(library), xbmc.LOGNOTICE)
+        videolibrary_mapper.clean_videolibrary_scan()
 
     def onDatabaseScanStarted(self, database):
         xbmc.log('onDatabaseScanStarted', xbmc.LOGNOTICE)
