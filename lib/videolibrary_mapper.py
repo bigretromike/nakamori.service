@@ -40,12 +40,11 @@ def clean_videolibrary_scan():
                 if 'shoko_aid' in tvshows['uniqueid'] and 'shoko_eid' in tvshows['uniqueid']:
                     said = tvshows['uniqueid'].get('shoko_aid', 0)
                     seid = tvshows['uniqueid'].get('shoko_eid', 0)
-                    # not supported
                     aaid = tvshows['uniqueid'].get('anidb_aid', 0)
                     aeid = tvshows['uniqueid'].get('anidb_eid', 0)
             if tid > 0 and eid > 0 and said > 0 and seid > 0:
                 if not series_map.check(tid=tid, aid=aaid, sid=said):
-                    series_map.add_map(tid=tid, aid=aaid, sid=sid)
+                    series_map.add_map(tid=tid, aid=aaid, sid=said)
                 if not episodes_map.check(vlid=eid, eid=aeid, sid=seid):
                     episodes_map.add_map(vlid=eid, eid=aeid, sid=seid)
 
