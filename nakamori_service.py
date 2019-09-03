@@ -13,9 +13,6 @@ import xbmcaddon
 import time
 import json
 
-global json_id
-json_id = 0
-
 
 def handle_scrobbling():
     """

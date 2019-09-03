@@ -4,6 +4,9 @@ import json
 import series_map
 import episodes_map
 
+global json_id
+json_id = 0
+
 
 def kodi_rpc(method, params, limits=''):
     json_id += 1
@@ -42,11 +45,14 @@ def clean_videolibrary_scan():
                     seid = tvshows['uniqueid'].get('shoko_eid', 0)
                     aaid = tvshows['uniqueid'].get('anidb_aid', 0)
                     aeid = tvshows['uniqueid'].get('anidb_eid', 0)
+                xbmc.log(' ====> uniqueid: %s => %s => %s, %s => %s => %s' % (tid, said, aaid, eid, seid, aeid), xbmc.LOGNOTICE)
             if tid > 0 and eid > 0 and said > 0 and seid > 0:
                 if not series_map.check(tid=tid, aid=aaid, sid=said):
                     series_map.add_map(tid=tid, aid=aaid, sid=said)
+                    xbmc.log(' ====> add_series: %s => %s, %s' % (tid, aaid, said), xbmc.LOGNOTICE)
                 if not episodes_map.check(vlid=eid, eid=aeid, sid=seid):
                     episodes_map.add_map(vlid=eid, eid=aeid, sid=seid)
+                    xbmc.log(' ====> add_episod: %s => %s, %s' % (eid, aeid, seid), xbmc.LOGNOTICE)
 
         index_step = index_stop - index_start
         index_start = index_stop
