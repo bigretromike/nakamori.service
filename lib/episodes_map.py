@@ -27,7 +27,7 @@ db_connection.close()
 def add_map(vlid, eid, sid):
     db_connection = database.connect(db_file)
     db_cursor = db_connection.cursor()
-    db_cursor.execute('INSERT INTO library_map (vlid, eid, sid) VALUES (?, ?)', (vlid, eid, sid))
+    db_cursor.execute('INSERT INTO library_map (vlid, eid, sid) VALUES (?, ?, ?)', (vlid, eid, sid))
     db_connection.commit()
     db_connection.close()
 
@@ -41,6 +41,8 @@ def get(vlid=0, eid=0, sid=0):
             db_cursor.execute('SELECT vlid, eid, sid FROM library_map WHERE vlid=?', (vlid,))
         elif vlid == 0 and eid != 0 and sid == 0:
             db_cursor.execute('SELECT vlid, eid, sid FROM library_map WHERE eid=?', (eid,))
+        elif vlid == 0 and eid != 0 and sid != 0:
+            db_cursor.execute('SELECT vlid, eid, sid FROM library_map WHERE eid=? AND sid=?', (eid, sid))
         elif vlid == 0 and eid == 0 and sid != 0:
             db_cursor.execute('SELECT vlid, eid, sid FROM library_map WHERE sid=?', (sid,))
         items = db_cursor.fetchone()

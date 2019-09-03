@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 import xbmc
-import xbmcaddon
 import json
-# from nakamori_utils import script_utils
-import library_map as map
-# addon = xbmcaddon.Addon('service.nakamori')
 import videolibrary_mapper
+import episodes_map as e_map
 
 
+# updated to v19 list, removed deprecated
 class CustomMonitor(xbmc.Monitor):
     def __init__(self):
         super(CustomMonitor, self).__init__()
@@ -34,22 +32,15 @@ class CustomMonitor(xbmc.Monitor):
     def onScanFinished(self, library):
         xbmc.log('onScanFinished', xbmc.LOGNOTICE)
         xbmc.log(str(library), xbmc.LOGNOTICE)
+        # if scan for new content is finish lets iterate all items and map them to shoko internal id's
         videolibrary_mapper.clean_videolibrary_scan()
-
-    def onDatabaseScanStarted(self, database):
-        xbmc.log('onDatabaseScanStarted', xbmc.LOGNOTICE)
-        xbmc.log(str(database), xbmc.LOGNOTICE)
-
-    def onDatabaseUpdated(self, database):
-        xbmc.log('onDatabaseUpdated', xbmc.LOGNOTICE)
-        xbmc.log(str(database), xbmc.LOGNOTICE)
-
-    def onCleanFinished(self, library):
-        xbmc.log('onCleanFinished', xbmc.LOGNOTICE)
-        xbmc.log(str(library), xbmc.LOGNOTICE)
 
     def onCleanStarted(self, library):
         xbmc.log('onCleanStarted', xbmc.LOGNOTICE)
+        xbmc.log(str(library), xbmc.LOGNOTICE)
+
+    def onCleanFinished(self, library):
+        xbmc.log('onCleanFinished', xbmc.LOGNOTICE)
         xbmc.log(str(library), xbmc.LOGNOTICE)
 
     def onAbortRequested(self):
@@ -60,29 +51,28 @@ class CustomMonitor(xbmc.Monitor):
         xbmc.log('Found data: %s' % data, xbmc.LOGNOTICE)
         xbmc.log('Found method: %s' % method, xbmc.LOGNOTICE)
 
+        # sync VL watched flag with shoko
         if method == 'VideoLibrary.OnUpdate':
             response = json.loads(data)
             xbmc.log('Found response: %s' % response, xbmc.LOGNOTICE)
             # TODO UpdateLibrary is broken because missing info: https://github.com/xbmc/xbmc/issues/16245
+            # TODO its broken for anything played ourtside VideoLibrary
 
-            # if 'item' in response and 'type' in response['item'] and response.get('item').get('type') == 'episode':
-            #     playcount = response.get('playcount', -1)
-            #     episode_id = int(response['item'].get('id', 0))
-            #     # this event get trigger while adding items from video source
-            #     if episode_id > 0 and playcount != -1:
-            #         rpc = xbmc.executeJSONRPC('{ "jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodeDetails", "params": {"properties": ["file", "productioncode"], "episodeid": %s}, "id": 1 }' % episode_id)
-            #         rpc_json = json.loads(rpc)
-            #         if 'episodedetails' in rpc_json['result'] and 'file' in rpc_json['result'].get('episodedetails'):
-            #             file = rpc_json['result'].get('episodedetails').get('file')
-            #             if 'plugin.video.nakamori' in file:
-            #                 file = file.replace('plugin://plugin.video.nakamori/tvshows/', '')
-            #                 file = file.replace('/play', '')
-            #                 ep_id = int(file)
-            #                 watch_flag = True if playcount == 1 else False
-            #                 xbmc.executebuiltin("RunScript(script.module.nakamori,/episode/%s/set_watched/%s)" % (ep_id, watch_flag))
-            #             else:
-            #                 # not our file
-            #                 pass
+            if 'item' in response:
+                # {u'item': {u'type': u'episode', u'id': 6}, u'transaction': True}  <- when adding to db
+                # {u'item': {u'type': u'episode', u'id': 6}, u'added': True, u'transaction': True}  <- when adding to db
+                if 'transaction' not in respone['item'] and 'added' not in respone['item']:
+                    # {u'item': {u'type': u'episode', u'id': 6}, u'playcount': 1}
+                    if 'type' in response['item'] and response.get('item').get('type') == 'episode':
+                        playcount = response.get('playcount', -1)
+                        episode_id = int(response['item'].get('id', 0))
+                        # this event get trigger while adding items from video source
+                        if episode_id > 0 and playcount != -1:
+                            shoko_eid = e_map.get(vlid=episode_id)
+                            if shoko_eid is not None:
+                                shoko_eid = shoko_eid[2]
+                                watch_flag = True if playcount == 1 else False
+                                xbmc.executebuiltin("RunScript(script.module.nakamori,/episode/%s/set_watched/%s)" % (shoko_eid, watch_flag))
 
         # full list of all method that we could use (excluding AudioLibrary)
         # https://github.com/xbmc/xbmc/blob/master/xbmc/interfaces/json-rpc/schema/notifications.json

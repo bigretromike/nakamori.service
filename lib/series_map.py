@@ -13,7 +13,7 @@ else:
     profileDir = xbmc.translatePath(profileDir)
     if not os.path.exists(profileDir):
         os.makedirs(profileDir)
-    db_file = os.path.join(profileDir, 's_map.db')
+    db_file = os.path.join(profileDir, 'a_map.db')
     db_connection = database.connect(db_file)
     db_cursor = db_connection.cursor()
     try:
@@ -27,7 +27,7 @@ db_connection.close()
 def add_map(tid, aid, sid):
     db_connection = database.connect(db_file)
     db_cursor = db_connection.cursor()
-    db_cursor.execute('INSERT INTO library_map (tid, aid, sid) VALUES (?, ?)', (tid, aid, sid))
+    db_cursor.execute('INSERT INTO library_map (tid, aid, sid) VALUES (?, ?, ?)', (tid, aid, sid))
     db_connection.commit()
     db_connection.close()
 

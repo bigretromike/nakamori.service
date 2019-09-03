@@ -8,6 +8,7 @@ from nakamori_utils.script_utils import log_setsuzoku
 from setsuzoku import Category, Action, Event
 
 import lib.custom_monitor as cm
+import lib.videolibrary_mapper as vl
 import xbmc
 import xbmcaddon
 import time
@@ -27,41 +28,41 @@ if __name__ == '__main__':
     log_setsuzoku(Category.SERVICE, Action.MONITOR, Event.STARTUP)
     _last_call = int(time.time())
     last_call = int(xbmcaddon.Addon('service.nakamori').getSetting('last_call'))
+    _last_sync_call = 0
     monitor = cm.CustomMonitor()
 
     while not monitor.abortRequested():
+        # debug
+        # vl.clean_videolibrary_scan()
+
+        time_now = int(time.time())
+
         # once per hour
-        if (int(time.time()) - _last_call) > 86400:
-            _last_call = int(time.time())
+        if (time_now - _last_call) > 86400:
+            _last_call = time_now
             log_setsuzoku(Category.SERVICE, Action.MONITOR, Event.CALL)
 
         # once per week
-        if (int(time.time()) - last_call) > 604800:
+        if (time_now - last_call) > 604800:
             log_setsuzoku(Category.SYSTEM, Action.KODI, xbmc.getInfoLabel('System.BuildVersion'))
 
             # fix for busy from osversioninfo + future failsafe just in case
             _try = 0
-            os_version = str(xbmc.getInfoLabel('System.OSVersionInfo')).lower()
-            while os_version == 'busy' and _try < 3:
+            os_version = str(xbmc.getInfoLabel('System.OSVersionInfo'))
+            while not vl.has_numbers(os_version) and _try <= 3:
                 _try += 1
                 xbmc.sleep(1000)
-                os_version = str(xbmc.getInfoLabel('System.OSVersionInfo')).lower()
+                os_version = str(xbmc.getInfoLabel('System.OSVersionInfo'))
 
-            last_call = int(time.time())
+            last_call = time_now
             xbmcaddon.Addon('service.nakamori').setSetting('last_call', '%s' % last_call)
-            log_setsuzoku(Category.SYSTEM, Action.OS, xbmc.getInfoLabel('System.OSVersionInfo'))
+            log_setsuzoku(Category.SYSTEM, Action.OS, os_version)
 
-
-        # we are running, check the players for relevant playback
-        # player = xbmc.Player()
-        # if not player.isPlayingVideo():
-        #    continue
-
-        # playing_file = player.getPlayingFile()
-        # if playing_file is None or server not in playing_file:
-        #    continue
-
-        handle_scrobbling()
+        # sync watch flag from shoko, once per hour
+        if (time_now - _last_sync_call) > 86400:
+            vl.query_last_watched_episodes()
+            vl.process_queue_of_watched_episodes()
+            _last_sync_call = time_now
 
         # Sleep/wait for abort for 10 seconds
         if monitor.waitForAbort(10):
