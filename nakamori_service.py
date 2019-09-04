@@ -32,6 +32,9 @@ if __name__ == '__main__':
     monitor = cm.CustomMonitor()
 
     while not monitor.abortRequested():
+        s_watch = True if xbmcaddon.Addon('service.nakamori').getSetting('sv-watch') == 'true' else False
+        s_rate = True if xbmcaddon.Addon('service.nakamori').getSetting('sv-rate') == 'true' else False
+
         # debug
         # vl.clean_videolibrary_scan()
 
@@ -58,11 +61,12 @@ if __name__ == '__main__':
             xbmcaddon.Addon('service.nakamori').setSetting('last_call', '%s' % last_call)
             log_setsuzoku(Category.SYSTEM, Action.OS, os_version)
 
-        # sync watch flag from shoko, once per hour
+        # sync watch flag from shoko to videolibrary, once per hour
         if (time_now - _last_sync_call) > 86400:
-            vl.query_last_watched_episodes()
-            vl.process_queue_of_watched_episodes()
-            _last_sync_call = time_now
+            if s_watch or s_rate:
+                vl.query_last_watched_episodes()
+                vl.process_queue_of_watched_episodes()
+                _last_sync_call = time_now
 
         # Sleep/wait for abort for 10 seconds
         if monitor.waitForAbort(10):

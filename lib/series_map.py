@@ -20,8 +20,7 @@ else:
         db_cursor.execute('CREATE TABLE IF NOT EXISTS [library_map] ([tid] INTEGER NOT NULL, [aid] INTEGER NOT NULL, [sid] INTEGER NOT NULL);')
     except:
         pass
-
-db_connection.close()
+    db_connection.close()
 
 
 def add_map(tid, aid, sid):
