@@ -61,7 +61,7 @@ class CustomMonitor(xbmc.Monitor):
             if 'item' in response:
                 # {u'item': {u'type': u'episode', u'id': 6}, u'transaction': True}  <- when adding to db
                 # {u'item': {u'type': u'episode', u'id': 6}, u'added': True, u'transaction': True}  <- when adding to db
-                if 'transaction' not in respone['item'] and 'added' not in respone['item']:
+                if 'transaction' not in response['item'] and 'added' not in response['item']:
                     # {u'item': {u'type': u'episode', u'id': 6}, u'playcount': 1}
                     if 'type' in response['item'] and response.get('item').get('type') == 'episode':
                         playcount = response.get('playcount', -1)
