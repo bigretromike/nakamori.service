@@ -2,8 +2,8 @@
 import xbmc
 import xbmcaddon
 import json
-import videolibrary_mapper
-import episodes_map as e_map
+from lib import videolibrary_mapper
+from lib import episodes_map as e_map
 
 
 # updated to v19 list, removed deprecated

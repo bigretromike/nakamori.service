@@ -3,9 +3,9 @@ import xbmc
 import xbmcaddon
 import json
 from datetime import date
-import series_map as series
-import episodes_map as episodes
-import sync_helper as sync
+from lib import series_map as series
+from lib import episodes_map as episodes
+from lib import sync_helper as sync
 from proxy.python_version_proxy import python_proxy as pyproxy  # lib
 from error_handler import spam, log  # lib
 
