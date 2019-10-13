@@ -2,12 +2,10 @@
 <settings>
     <category label="32000">
         <setting label="32001" type="lsep"/>
-            <setting label="32003" type="bool" id="vs-watch" default="false"/>
-            <setting label="32004" type="bool" id="vs-rate" default="false"/>
+            <setting label="32003" type="bool" id="vs_watch" default="true"/>
+            <setting label="32004" type="bool" id="vs_rate" default="true"/>
         <setting label="32002" type="lsep"/>
-            <setting label="32003" type="bool" id="sv-watch" default="false"/>
-            <setting label="32004" type="bool" id="sv-rate" default="false"/>
-
-        <setting type="number" id="last_call" default="1543210000" visible="false"/>
+            <setting label="32003" type="bool" id="sv_watch" default="true"/>
+            <setting label="32004" type="bool" id="sv_rate" default="true"/>
     </category>
 </settings>
